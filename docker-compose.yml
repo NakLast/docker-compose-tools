@@ -1,0 +1,222 @@
+version: "3"
+
+services:
+
+  postgres:
+    container_name: db_con
+    image: postgres:13.9-alpine3.17
+    restart: always
+    environment:
+      - POSTGRES_USER=sitearound
+      - POSTGRES_PASSWORD=1234567890
+      - POSTGRES_DB=Init
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./service_data/postgres/data:/var/lib/postgresql/data/pgdata
+    network_mode: "host"
+
+  mysql:
+    container_name: mysql_con
+    image: mysql:8.0.32
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=1234567890
+    volumes:
+      - ./service_data/mysql/data:/var/lib/mysql
+    network_mode: "host"
+
+  mongodb:
+    container_name: mongodb_con
+    image: mongo:6.0.5
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=sitearound
+      - MONGO_INITDB_ROOT_PASSWORD=1234567890
+    volumes:
+      - ./service_data/mongo/data:/data/db
+    network_mode: "host"
+  
+  influxdb:
+    container_name: influxdb_con
+    image: influxdb:2.6-alpine
+    restart: always
+    environment:
+      - DOCKER_INFLUXDB_INIT_USERNAME=sitearound
+      - DOCKER_INFLUXDB_INIT_PASSWORD=1234567890
+      - DOCKER_INFLUXDB_INIT_ORG=SWD
+      - DOCKER_INFLUXDB_INIT_BUCKET=Init
+    volumes:
+      - ./service_data/influx/data:/var/lib/influxdb2
+    network_mode: "host"
+
+  redis:
+    container_name: redis_con
+    image: redis:7.2-rc2-alpine3.18
+    restart: always
+    network_mode: "host"
+
+  pgadmin:
+    container_name: pg_con
+    image: dpage/pgadmin4:7.1
+    restart: always
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_LISTEN_PORT=5050
+    volumes:
+      - ./service_data/pg/data:/var/lib/pgadmin
+    network_mode: "host"
+
+  adminer:
+    container_name: adminer_con
+    image: adminer:4.8.1
+    restart: always
+    network_mode: "host"
+
+  mongo-express:
+    container_name: mongo_express_con
+    image: mongo-express:1.0.0-alpha
+    restart: always
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=sitearound
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=1234567890
+      - ME_CONFIG_MONGODB_URL=mongodb://sitearound:1234567890@localhost:27017/
+    network_mode: "host"
+
+  redis-commander:
+    container_name: commander_con
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - PORT=8881
+      - REDIS_HOSTS=local:localhost:6379
+    depends_on:
+      - redis
+    network_mode: "host"
+
+  rabbitmq:
+    container_name: rabbitmq_con
+    image: rabbitmq:3.11-management
+    restart: always
+    network_mode: "host"
+
+  uptime-kuma:
+    container_name: kuma_con
+    image: louislam/uptime-kuma:1.21.3-alpine
+    restart: always
+    volumes:
+      - ./service_data/kuma/data:/app/data
+    network_mode: "host"
+
+  grafana:
+    container_name: grafana_con
+    image: grafana/grafana:9.5.2
+    restart: always
+    volumes:
+      - ./service_data/grafana/config/grafana.ini:/etc/grafana/grafana.ini:rw
+      - ./service_data/grafana/data:/var/lib/grafana:rw
+    network_mode: "host"
+  
+  portainer:
+    container_name: portainer_con
+    image: portainer/portainer-ce:2.18.2-alpine
+    restart: always
+    volumes:
+      - ./service_data/portainer/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    network_mode: "host"
+  
+  pi-hole:
+    container_name: pi_hole_con
+    image: pihole/pihole:latest
+    restart: always
+    environment:
+      - TZ='Asia/Bangkok'
+      - WEBPASSWORD=Swd_12345
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    cap_add:
+      - NET_ADMIN
+    network_mode: "host"
+  
+  dashy:
+    container_name: dashy_con
+    image: lissy93/dashy:2.1.1
+    restart: always
+    environment:
+      - PORT=4000
+    volumes:
+      - ./service_data/dashy/config:/app/public
+    network_mode: "host"
+
+# volumes:
+#   postgres_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/postgres/data
+  
+#   mysql_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/mysql/data
+    
+#   mongo_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/mongo/data
+  
+#   influx_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/influx/data
+  
+#   pg_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/pg/data
+  
+#   kuma_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/kuma/data
+  
+#   grafana_config:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/grafana/config/grafana.ini
+
+#   grafana_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/grafana/data
+  
+#   portainer_data:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/portainer/data
+  
+#   dashy_config:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: ./service_data/dashy/config/conf.yml
